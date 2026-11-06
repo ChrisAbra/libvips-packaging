@@ -11,12 +11,3 @@ nuget/stage/
 nuget/bin/
 nuget/obj/
 nupkgs/
-
-deps/
-target/
-out/
-*.tar.gz
-nuget/stage/
-nuget/bin/
-nuget/obj/
-nupkgs/
