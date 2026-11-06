@@ -1,3 +1,7 @@
+forked to add LibRaw support:
+
+
+
 # Packaging scripts
 
 libvips and its dependencies are provided as pre-compiled shared libraries
