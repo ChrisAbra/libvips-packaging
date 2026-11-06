@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <NativeRid Condition="'$(NativeRid)' == ''">osx-arm64</NativeRid>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>MyApp.Vips.Native.$(NativeRid)</PackageId>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoWarn>NU5128</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="stage/$(NativeRid)/*.dylib" Pack="true" PackagePath="runtimes/$(NativeRid)/native/" />
+    <None Include="stage/$(NativeRid)/THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+</Project>
