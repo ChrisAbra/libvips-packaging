@@ -403,11 +403,6 @@ if [ "${DEPS_ONLY:-0}" = "1" ]; then
   exit 0
 fi
 
-if [[ "${DEPS_ONLY:-0}" == "1" ]]; then
-  echo "Native dependencies installed into ${TARGET}"
-  exit 0
-fi
-
 mkdir ${DEPS}/vips
 $CURL https://github.com/ChrisAbra/libvips/archive/dcrawload-icc-gamma-fix.tar.gz | tar xzC ${DEPS}/vips --strip-components=1
 cd ${DEPS}/vips
