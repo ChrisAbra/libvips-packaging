@@ -22,25 +22,23 @@ without_prerelease() {
 case ${PLATFORM} in
   linux*)
     LINUX=true
-    DEPS=/deps
-    TARGET=/target
+    DEPS="${DEPS:-/deps}"
+    TARGET="${TARGET:-/target}"
     PACKAGE=/packaging
     ROOT=/root
     VIPS_CPP_DEP=libvips-cpp.so.42
     ;;
   osx*)
     DARWIN=true
-    DEPS=$PWD/deps
-    TARGET=$PWD/target
+    DEPS="${DEPS:-$PWD/deps}"
+    TARGET="${TARGET:-$PWD/target}"
     PACKAGE=$PWD
     ROOT=$PWD/platforms/$PLATFORM
     VIPS_CPP_DEP=libvips-cpp.42.dylib
     ;;
 esac
 
-mkdir ${DEPS}
-mkdir ${TARGET}
-
+mkdir -p "${DEPS}" "${TARGET}"
 # Default optimisation level is for binary size (-Os)
 # Overridden to performance (-O3) for select dependencies that benefit
 export FLAGS+=" -Os -fPIC"
@@ -386,8 +384,32 @@ CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" ./configure --host=${CHOST} --
   --disable-examples --disable-openmp --disable-lcms --disable-jasper --enable-jpeg --enable-zlib
 make install-strip
 
+# macOS uses libc++, not GNU libstdc++.
+if [ "$DARWIN" = true ]; then
+  LIBRAW_PC="${TARGET}/lib/pkgconfig/libraw_r.pc"
+
+  if [ ! -f "$LIBRAW_PC" ]; then
+    echo "LibRaw pkg-config file not found: $LIBRAW_PC" >&2
+    exit 1
+  fi
+
+  sed 's/-lstdc++/-lc++/g' "$LIBRAW_PC" > "${LIBRAW_PC}.tmp"
+  mv "${LIBRAW_PC}.tmp" "$LIBRAW_PC"
+fi
+
+# Emulsion builds libvips separately using Meson/Ninja.
+if [ "${DEPS_ONLY:-0}" = "1" ]; then
+  echo "Native dependencies installed into ${TARGET}"
+  exit 0
+fi
+
+if [[ "${DEPS_ONLY:-0}" == "1" ]]; then
+  echo "Native dependencies installed into ${TARGET}"
+  exit 0
+fi
+
 mkdir ${DEPS}/vips
-$CURL https://github.com/libvips/libvips/releases/download/v${VERSION_VIPS}/vips-$(without_prerelease $VERSION_VIPS).tar.xz | tar xJC ${DEPS}/vips --strip-components=1
+$CURL https://github.com/ChrisAbra/libvips/archive/dcrawload-icc-gamma-fix.tar.gz | tar xzC ${DEPS}/vips --strip-components=1
 cd ${DEPS}/vips
 if [ "$LINUX" = true ]; then
   # Ensure symbols from external libs (except for libglib-2.0.a and libgobject-2.0.a) are not exposed
